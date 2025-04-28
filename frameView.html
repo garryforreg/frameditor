@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Property</title>
+    <meta charset="UTF-8">
+    <style>
+        html, body {
+            padding: 0px;
+            margin: 0px;
+        }
+
+        .main {
+            margin: 0px;
+            padding: 0px;
+            position: absolute;
+            top: 0px;
+            bottom: 0px;
+            left: 0px;
+            right: 0px;
+            background-color: transparent !important;
+        }
+
+        .gray-bg {
+            background-color: #000000;
+        }
+
+        #rootDiv {
+            border-radius: 0 0 12px 12px;
+        }
+
+        .top-title-wrap {
+            box-sizing: border-box;
+            padding: 3px 4px;
+            border-radius: 12px 12px 0 0;
+            background-color: #c1c1c1
+        }
+
+        .top-title-inner {
+            padding: 6px 6px 0;
+            border-radius: 10px 10px 0 0;
+            background-image: linear-gradient(to bottom, #e6e5e3, #d2d2d4, #ccc8c7);
+            border-bottom: 1px solid #d6d2d0;
+            font-size: 16px;
+            line-height: 1.5;
+            font-weight: 600
+        }
+
+        .custom-btns {
+            box-sizing: border-box;
+            height: 100%;
+            padding: 0 4px;
+            border: 1px solid #a2a2a2;
+            background-image: linear-gradient(to bottom, #e6e5e3, #d2d2d4, #ccc8c7);
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-in-wrap {
+            flex-shrink: 0;
+            display: block;
+            position: relative;
+            margin-left: 2px;
+            margin-right: 2px;
+            width: 32px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .btn-in-wrap .custom-btn {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .btn-in-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+        }
+
+        .custom-btn {
+            flex-shrink: 0;
+            display: block;
+            margin-left: 2px;
+            margin-right: 2px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            background: url(./images/icons.png) no-repeat center / 643px auto;
+            background-position-y: -37px;
+        }
+
+        .custom-btn.selected, .custom-btn:hover, .btn-in-wrap:hover .custom-btn {
+            background-position-y: 0;
+        }
+
+        .custom-btn.inactive {
+            background-position-y: -75px;
+        }
+
+        .operate-right-wrap {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .operate-right-wrap:before {
+            content: "";
+            position: absolute;
+            top: 2px;
+            bottom: 2px;
+            left: 5px;
+            width: 5px;
+            border-radius: 7px;
+            background: linear-gradient(to right, #9b9b9b, #fafafa, #dfdfdf, #b9b9b9, #a2a2a2);
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+        }
+
+        .operate-right-wrap label {
+            width: 130px;
+            text-align: right;
+        }
+
+        .operate-right-wrap .form-control {
+            box-sizing: border-box;
+            background: #FFFFFF none;
+            border: 1px solid #7a7a7a;
+            border-radius: 4px;
+            color: inherit;
+            display: block;
+            padding: 3px 6px 4px;
+            -webkit-transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
+            transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
+            width: 166px;
+            height: 31px;
+            font-size: 14px;
+        }
+
+        .operate-right-wrap .form-control:hover {
+            border-color: #2a2c2f !important;
+        }
+
+        .operate-right-wrap .form-control:focus {
+            border-color: #0078d7 !important;
+            -webkit-box-shadow: inset 0 1px 1px rgba(0, 120, 215, 0.08), 0 0 2px rgba(0, 120, 215, 0.6) !important;
+            box-shadow: inset 0 1px 1px rgba(0, 120, 215, 0.08), 0 0 2px rgba(0, 120, 215, 0.6) !important;
+        }
+
+        .property-wrap {
+            background: #c1c1c1;
+        }
+
+        .property-wrap:before {
+            z-index: 1;
+            content: "";
+            position: absolute;
+            background: #d4d0cd;
+            width: 100%;
+            height: 10px;
+            bottom: 0;
+        }
+
+        .property-wrap:after {
+            z-index: 2;
+            content: "";
+            position: absolute;
+            background: #c1c1c1;
+            border-radius: 0 0 12px 12px !important;
+            width: 100%;
+            height: 10px;
+            bottom: 0;
+        }
+    </style>
+    <link rel="stylesheet" href="js/jquery-ui.css">
+    <link rel="stylesheet" href="js/ContextMenu/custom-context-menu.css">
+    <script src="js/ht/core/ht.js"></script>
+
+    <script src="js/ht/plugin/ht-form.js"></script>
+
+    <script src="js/FrameCommon.js"></script>
+    <script src="js/jquery-3.7.1.min.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script src="js/jquery.thooClock.js"></script>
+    <script src="js/ContextMenu/contextMenu.js"></script>
+    <script src="js/ht/plugin/ht-cssanimation.js"></script>
+    <script src="js/ht/plugin/ht-autolayout.js"></script>
+    <script src="js/ht/plugin/ht-dialog.js"></script>
+
+    <script type="module">
+        import DrawXml from "./js/Element/XmlImport.js";
+        import Nodes2xml from "./js/Element/XmlExport.js";
+        import {EmText} from "./js/Element/EmText.js";
+        import {StTable} from "./js/Element/StTable.js";
+        import {DtTable} from "./js/Element/DtTable.js";
+        import {EmClock} from "./js/Element/EmClock.js";
+        import {EmSubject} from "./js/Element/EmSubject.js";
+        import {EmImage} from "./js/Element/EmImage.js";
+        import {EmVideo} from "./js/Element/EmVideo.js";
+        import {EmRectangle} from "./js/Element/EmRectangle.js";
+        import {EmArrow} from "./js/Element/EmArrow.js";
+        import {EmLine} from "./js/Element/EmLine.js";
+        import {EmCircular} from "./js/Element/EmCircular.js";
+
+        const backDivId = "divBack";
+        window.dataModel = new ht.DataModel();
+        //一定要使用这个参数，否则会缩放会出现异常
+        //修改了JqueryUI中的缩放要使用这个参数计算鼠标移动修正
+        window.scaleIncrement = 1;
+        window.selectNode = null;
+        let frameXmlParser = new DOMParser();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        // 获取名为 'stationCode' 的参数
+        StationCode = urlParams.get('stationCode');
+
+
+
+
+
+
+        function init(width, height) {
+            IsView = true;
+            //根div，用户固定尺寸，绘制DOM
+            $("#rootDiv").remove()
+            let rootDiv = createDiv('rootDiv', 'rgb(0,0,0)');
+            $(rootDiv).css('overflow-x', 'auto')
+            $(rootDiv).css('overflow-y', 'auto')
+            $(rootDiv).css("box-sizing", "border-box");
+            $(rootDiv).css("width", width + 50);
+            $(rootDiv).css("height", height + 50);
+            //超出部分不显示
+            $(rootDiv).css("overflow", "hidden");
+            //不显示滚动条
+            $(rootDiv).css("overflow-x", "hidden");
+
+
+            //这个是背板，放置根div
+            let boardBackDiv = createDiv(backDivId, "rgba(0,0,0,0)");
+            let $backDiv = $(boardBackDiv);
+            $backDiv.css("box-sizing", "border-box");
+            $backDiv.css("background-color", "rgba(0,0,0,0)");
+            $backDiv.css("background-repeat", "repeat");
+            window.backDiv = $backDiv;
+            rootDiv.append(boardBackDiv);
+
+
+
+
+            //这里是属性面板
+            let propertyFrame = document.createElement('iframe');
+            propertyFrame.id = "propertyFrame"
+            // 设置iframe的属性
+            propertyFrame.src = 'property.html'; // 指定URL
+            propertyFrame.width = '100%'; // 宽度
+            propertyFrame.height =  '100%'; // 高度
+            propertyFrame.frameBorder = 0; // 边框
+            window.propertyFrame = propertyFrame;
+
+            let propertyDiv = createDiv("pptDiv", "rgba(0,0,0,0)");
+            propertyDiv.append(propertyFrame)
+            $(propertyDiv).css("width", 0);
+            $(propertyDiv).css("height", 0);
+            $(propertyFrame).on("load", function () {
+                console.log("iframe加载完成");
+                //只有属性界面加载完成后才能发送type0，表示可以接收xml了
+                postMessageToParent({
+                    type:"0"
+                })
+            });
+            rootDiv.append(propertyDiv);
+
+
+            document.body.appendChild(rootDiv);
+            window.addEventListener('resize', function (e) {
+                //mainView.invalidate();
+            }, false);
+            let backDivWidth = width;
+            let backDivHeight = height;
+            $backDiv.width(backDivWidth);
+            $backDiv.height(backDivHeight);
+            rootDiv.onLayouted = function (x, y, width, height) {
+                // console.log(width,height,x,y);
+                //计算y轴起始位置
+                let sTop = $(window).height() - height;
+                //如果x轴不是从0开始，可能还需要计算x轴起始位置
+                //将backDiv 放置在中心位置
+                let backDivLeft = 10;//width/2 - backDivWidth/2;
+                if (backDivLeft < 0)
+                    backDivLeft = 0;
+                let backDivTop = 10;//height/2 - backDivHeight/2;
+                if (backDivTop < 0)
+                    backDivTop = 0;
+                $backDiv.offset({left: backDivLeft, top: backDivTop + sTop});
+                // console.log(backDivLeft,backDivTop);
+            };
+            $backDiv.on('mousedown', function (e) {
+
+                //todo: 鼠标点击
+                console.log("清空选择控件");
+            });
+
+        }
+
+
+        function SetNewBoard(width, height) {
+            //清理node
+            let elFrame = window.propertyFrame;
+            elFrame.contentWindow.ClearProperty();
+            let allData = window.dataModel .getDatas();
+            for (let i = 0; i < allData._as.length; i++){
+                window.dataModel.remove(allData[i]);
+            }
+            window.dataModel.clear();
+            //一定要使用这个参数，否则会缩放会出现异常
+            //修改了JqueryUI中的缩放要使用这个参数计算鼠标移动修正
+            window.scaleIncrement = 1;
+            window.selectNode = null;
+            FrameId = "";
+            FrameName = "";
+            PisType = -1;
+            backDiv.css('transform', 'scale(' + window.scaleIncrement  + ')');
+            backDiv.css('transform-origin', 'top left');
+            //背板调整
+            let $rootDiv = $("#rootDiv");
+            $rootDiv.width( width );
+            $rootDiv.height(height );
+
+            window.backDiv.empty();
+            backDiv.width(width);
+            backDiv.height(height);
+        }
+
+        window.onload = function () {
+
+            init(100, 100);
+
+            window.reciveMsg=function(obj){
+                //415_1152*640;全彩
+                let typeStr = "";
+                if(obj.type === "0"){
+                    let dsObj = obj.obj;
+                    DsInfo = dsObj;
+                    console.log(dsObj);
+                }
+                else if (obj.type === "2") {
+                    //屏幕尺寸。类型
+                    typeStr = obj.obj;
+                    let typeObj = ParseScreenTypeStr(typeStr)
+                    ScreenWidth = typeObj.width;
+                    ScreenHeight = typeObj.height;
+                    PisType = typeObj.screenType;
+                    ScreenTypeDesc = typeObj.colorType;
+                    SetNewBoard(ScreenWidth, ScreenHeight);
+                    console.log(obj);
+                } else if (obj.type === "1") {
+                    if (obj.stationCode === "" || obj.modId ==="" || obj.obj == null)
+                    {
+                        return;
+                    }
+                    //帧数据
+                    StationCode = obj.stationCode;
+
+                    let frameInfo = obj.obj;
+                    if (frameInfo === undefined){
+                        console.log("帧字符串为空");
+                    }else{
+                        let xmlDoc = frameXmlParser.parseFromString(frameInfo, "text/xml");
+                        let xml = $(xmlDoc);
+                        typeStr = xml.find('ScreeTypeID').text();
+                        let typeObj = ParseScreenTypeStr(typeStr)
+                        ScreenWidth = typeObj.width;
+                        ScreenHeight = typeObj.height;
+                        ScreenTypeDesc = typeObj.colorType;
+                        SetNewBoard(ScreenWidth, ScreenHeight);
+                        FrameName = xml.find('NAME').text();
+                        FrameId = obj.modId;
+                        PisType = typeObj.screenType;
+                        DrawXml(window.backDiv, xml, dataModel);
+                        console.log(obj);
+                        //通知父页面，完成加载
+                        postMessageToParent({
+                            type:"1",
+                            width:ScreenWidth,
+                            height:ScreenHeight
+                        })
+                    }
+                }
+            }
+
+            window.scaleSize = function (rate) {
+                let $rootDiv = $("#rootDiv");
+                window.scaleIncrement = rate;
+
+                $rootDiv.css('transform', 'scale(' + window.scaleIncrement + ')');
+                $rootDiv.css('transform-origin', 'top left');
+            };
+
+            window.sendParentMsg = function (obj){
+                postMessageToParent({
+                    type:"2",
+                    obj:obj
+                });
+            }
+
+
+
+        }
+
+        function postMessageToParent(arg) {
+            window.parent.postMessage(arg, "*");
+        }
+
+
+
+
+
+
+    </script>
+
+</head>
+<body class="gray-bg">
+
+
+</body>
+</html>

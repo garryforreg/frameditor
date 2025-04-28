@@ -1,0 +1,368 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        html, body {
+            padding: 0px;
+            margin: 0px;
+            background-color: #bfbfbf;
+        }
+        .main {
+            margin: 0px;
+            padding: 0px;
+            position: absolute;
+            top: 0px;
+            bottom: 0px;
+            left: 0px;
+            right: 0px;
+        }
+        /* 在你的CSS中定义选中行的样式 */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #e5e4e4;
+            text-align: left;
+        }
+
+        .table-back {
+            background-color: #BFBFBFFF; /* 或其他你想要的背景色 */
+        }
+        .selected-row {
+            background-color: #f5f5f5; /* 或其他你想要的背景色 */
+        }
+        .split-row {
+            background-color:  #717171;
+        }
+
+
+        /* 可选：定义鼠标悬停时的样式 */
+        tr:hover {
+            background-color: #ddd; /* 鼠标悬停时的背景色 */
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Title</title>
+ 
+    <link href="js/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="js/jquery-ui.css">
+    <script src="js/jquery-3.7.1.min.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script src="js/select2.min.js"></script>
+<!--    <script src="js/colorpicker/jquery.colorpicker.js"></script>-->
+<!--    <link href="js/colorpicker/jquery.colorpicker.css" rel="stylesheet" type="text/css"/>-->
+<!--    <script src="js/colorpicker/i18n/jquery.ui.colorpicker-nl.js"></script>-->
+<!--    <script src="js/colorpicker/swatches/jquery.ui.colorpicker-pantone.js"></script>-->
+<!--    <script src="js/colorpicker/swatches/jquery.ui.colorpicker-crayola.js"></script>-->
+<!--    <script src="js/colorpicker/swatches/jquery.ui.colorpicker-ral-classic.js"></script>-->
+<!--    <script src="js/colorpicker/swatches/jquery.ui.colorpicker-x11.js"></script>-->
+<!--    <script src="js/colorpicker/swatches/jquery.ui.colorpicker-copic.js"></script>-->
+<!--    <script src="js/colorpicker/swatches/jquery.ui.colorpicker-prismacolor.js"></script>-->
+<!--    <script src="js/colorpicker/swatches/jquery.ui.colorpicker-isccnbs.js"></script>-->
+<!--    <script src="js/colorpicker/swatches/jquery.ui.colorpicker-din6164.js"></script>-->
+<!--    <script src="js/colorpicker/parts/jquery.ui.colorpicker-rgbslider.js"></script>-->
+<!--    <script src="js/colorpicker/parts/jquery.ui.colorpicker-memory.js"></script>-->
+<!--    <script src="js/colorpicker/parts/jquery.ui.colorpicker-swatchesswitcher.js"></script>-->
+<!--    <script src="js/colorpicker/parsers/jquery.ui.colorpicker-cmyk-parser.js"></script>-->
+<!--    <script src="js/colorpicker/parsers/jquery.ui.colorpicker-cmyk-percentage-parser.js"></script>-->
+
+
+
+</head>
+
+<body>
+ 
+<script>
+    let node = null;
+    let $table = null;
+    let  $tbody = null;
+    let rowIndex = -1;
+    function Init() {
+        // 你的代码
+        let headers = ["项", "值"];
+        // 创建表格元素
+        $table = $('<table>').attr('id', 'propertyTable');
+        $table.on('contextmenu', function (e) {
+            e.preventDefault();
+        });
+        let $thead = $('<thead>');
+        $tbody = $('<tbody>').attr('id', 'propertyBody');
+        $tbody.attr('id', 'propertyBody');
+        let $tr = $('<tr>');
+        // 填充表头
+        $.each(headers, function (index, value) {
+            $tr.append($('<th>').text(value));
+        });
+        $thead.append($tr);
+        $table.width("100%");
+        $table.addClass('table-back');
+        
+        // 绑定点击事件给所有的表格行
+
+        $table.click(function(e) {
+          
+            if (e.target instanceof HTMLTableCellElement) {
+                //表格的某个cell被点击了
+                let cell = $(e.target)
+                rowIndex = cell.get(0).parentNode.rowIndex;
+            }else{
+                //往上找，找到tr
+                let tr = $(e.target).closest('tr');
+                if (tr.length > 0){
+                    rowIndex = tr.get(0).rowIndex;
+                }
+            }
+            // 移除所有行的选中样式
+            $table.find('tr').each(function(index,tr) {
+                if (rowIndex !== index && $(tr).hasClass('selected-row')){
+                    $(tr).removeClass('selected-row');
+                }
+                if (rowIndex === index ){
+                    $(tr).addClass('selected-row');
+                }
+            })
+        
+        });
+        
+        // 组装表格并添加到页面
+        $table.append($thead).append($tbody);
+        // 将创建好的表格添加到页面的特定容器中
+        document.body.append($table.get(0));
+    }
+
+    $(function() {
+        if ($tbody === null)
+        Init();
+    });
+
+    window.ClearProperty = function (){
+        if ($tbody !== null)
+            $tbody.empty();
+    }
+    window.GetSelectRow = function () {
+        return rowIndex;
+    }
+    /**
+     * 修改属性名
+     * @param id
+     * @param newName
+     * @constructor
+     */
+    window.ReNameProperty = function (id,newName){
+        let $cell = $("#nameTd_" + id);
+        $cell.text(newName);
+    }
+
+    window.GetPropertyValue = function (id){
+        let $cell = $("#valueTd_" + id);
+        return $cell.get(0).childNodes[0];
+    }
+    
+    window.GetDisplayName = function (id){
+        let $cell = $("#nameTd_" + id);
+        return $cell.text();
+    }
+    
+    window.onload = function () {
+      
+    }
+ 
+     window.AddSplitRow = function (text) {
+         if ($tbody === null) {
+             Init();
+         }
+
+         let $elDataElement = $('<label>').text(text);
+
+         let $tr = $('<tr>');
+         let $nameTd = $('<td>')
+         $nameTd.append($elDataElement);
+         $nameTd.attr("colspan", 2);
+         $nameTd.addClass("split-row");
+         $tr.append($nameTd);
+
+         $tbody.append($tr);
+
+     }
+
+
+    /**
+     * 添加属性
+     * @param id
+     * @param name 属性名称
+     * @param data 数据
+     * @param ds 数据源（仅限于下拉菜单）
+     * @param type 类型 "text/string","int","color","label","dropDownList/dropDownList_font","custom"
+     * @param setValue 回调函数
+     * @constructor
+     */
+    window.AddPropertyUseId = function (id,name,data,ds,type,setValue){
+        if ($tbody === null)
+        {
+            Init();
+        }
+ 
+        let drData = [];
+        let $elDataElement = null;
+        if (type.toLowerCase() === "label"){
+            $elDataElement = $('<span>').text(data);
+        }else if(  type.toLowerCase() === "int"){
+            $elDataElement = $('<input>').val(data);
+            $elDataElement.on('keydown', function(e){
+                onlyNumber(e,this);
+            });
+            $elDataElement.on('change', function(e){
+                if (isNaN(parseInt( $elDataElement.val()))){
+                    $elDataElement.val(data);
+                }else{
+                    $('<input>').val();
+                }
+            });
+            $elDataElement.on('blur', function(e){
+                setValue(parseInt( $elDataElement.val()));
+            });
+            //$elDataElement的回车事件
+            $elDataElement.on('keydown', function(e){
+                if (e.keyCode === 13) {
+                    setValue(parseInt( $elDataElement.val()));
+                }
+            });
+        }else if(type.toLowerCase() === "text" || type.toLowerCase() === "string"){
+            //文本
+            $elDataElement = $('<input>').val(data);
+            $elDataElement.on('blur', function(e){
+                setValue($elDataElement.val());
+            });
+            $elDataElement.on('keydown', function(e){
+                if (e.keyCode === 13) {
+                    setValue($elDataElement.val());
+                }
+            });
+        }else if (type.toLowerCase() === "color"){
+            //呼叫父窗体，弹出一个颜色选择框框,并获取返回值
+            $elDataElement = $('<input type="text">');
+            $elDataElement.val(data);
+            $elDataElement.css("background-color", data);
+            $elDataElement.setColor = function (color) {
+                setValue(color);
+            };
+            
+            $elDataElement.on('dblclick', function(e){
+                window.parent.openColorPicker($elDataElement);
+            });
+            //失去焦点的时候，改变改变颜色
+            $elDataElement.on('blur', function(e){
+               let color = $(this).val();
+                $(this).css("background-color", color);
+                setValue(color);
+            })
+
+        }else if (type.toLowerCase() === "dropdownlist" || type.toLowerCase() === "dropdownlist_font"){
+            
+            //先组织一下数据
+            drData = [];
+            drData.push({
+                id: "",
+                text: "请选择",
+                selected : false
+            })
+            $.each(ds, function(index, item) {
+                let isSelect = false;
+                if (data !== null && data !== undefined && item.value.toString() === data.toString()){
+                    isSelect = true;
+                }
+                if (type.toLowerCase() === "dropdownlist_font"){
+                    if (data !== null && data !== undefined && item.label.toString() === data.toString()){
+                        isSelect = true;
+                    }
+                }
+                drData.push({
+                    id: item.value,
+                    text: item.label,
+                    selected : isSelect
+                })
+            }
+            );
+              
+            $elDataElement = $('<select></select>')
+            $elDataElement.on('change', function(e){
+                let selectedValue = $(this).val();
+                setValue(selectedValue);
+            });
+        } else if(type.toLowerCase() === "custom"){
+            if(!isDOMElement(ds)){
+                return
+            }
+            $elDataElement = $(ds);
+        }
+
+        if (id !== null  && $elDataElement !== null){
+            $elDataElement.attr("id",id);
+        }
+        let $tr = $('<tr>');
+        let $nameTd = $('<td>').text(name)
+        if (id != null){
+            $nameTd.attr("id","nameTd_" +id);
+        }
+        $tr.append($nameTd);
+        let $valueTd = $('<td>');
+        $valueTd.attr("id","valueTd_" +id);
+        $valueTd.append($elDataElement);
+        $tr.append($valueTd);
+        $tbody.append($tr);
+        if ($elDataElement !== null && drData.length > 0){
+            $elDataElement.select2({
+                data: drData,
+                placeholder: '=请选择=',
+                allowClear: false,
+                width: '100%'
+            });
+        }
+     
+        
+        return $tr;
+    }
+    /**
+     * 添加属性
+     * @param name 属性名称
+     * @param data 数据
+     * @param ds 数据源（仅限于下拉菜单）
+     * @param type 类型 "text/string","int","color","label","dropDownList","custom"
+     * @param setValue 回调函数
+     * @constructor
+     */
+    window.AddProperty = function (name,data,ds,type,setValue){
+        return  window.AddPropertyUseId(null,name,data,ds,type,setValue);
+    }
+
+    function isDOMElement(element) {
+        return element !== null &&
+            typeof element === 'object' &&
+            element.nodeType === 1 &&
+            typeof element.nodeName === 'string';
+    }
+
+    // 绑定keypress事件处理器
+   function onlyNumber (e,obj) {
+        // 允许退格键、删除键、左右方向键、小数点（如果你需要输入浮点数）和数字键
+        if (
+            $.inArray(e.keyCode, [46, 8, 37, 39]) !== -1 || // 删除键和左右方向键
+            (e.keyCode >= 48 && e.keyCode <= 57) || // 数字键0-9
+            (e.keyCode >= 96 && e.keyCode <= 105) || // 小键盘数字
+            //减号
+            (e.keyCode == 109 || e.keyCode == 189) && ($(obj).val().indexOf('-') === -1) ||
+            
+            (e.keyCode == 190 || e.keyCode == 110) && ($(obj).val().indexOf('.') === -1) // 小数点
+        ) {
+            // 允许输入
+        } else {
+            // 阻止其他按键输入
+            e.preventDefault();
+
+        }
+    }
+    
+</script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<table>
+    <tr>
+        <td><label for="txtCondition">条件内容</label></td>
+        <td><textarea   id="txtCondition"></textarea></td>
+    </tr>
+    <tr>
+        <td><label for="cbxFieldList">字段列表</label></td>
+        <td><select id="cbxFieldList"></select></td>
+    </tr>
+    <tr>
+        <td><label for="cbxDateList">日期列表</label></td>
+        <td><select  id="cbxDateList"></select></td>
+    </tr>
+    <tr>
+        <td><label>条件</label></td>
+        <td><span>
+            <input type="button"  onclick="btnBiggerClick()" id="btnBigger" value=">">
+            <input type="button"  onclick="btnSmallerClick()"  id="btnSmaller" value="<">
+            <input type="button"  onclick="btnEqualClick()"  id="btnEqual" value="=">
+            <input type="button"  onclick="btnOrClick()"  id="btnOr" value="OR">
+            <input type="button"  onclick="btnAndClick()"  id="btnAnd" value="AND">
+        </span></td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <span>
+                <button id="btnAddField" onclick="btnAddFieldClick()">添加绑定字段</button>
+                  <button id="btnAddDate" onclick="btnAddDateClick()">添加日期</button>
+                       <button id="btnConfirm" onclick="btnConfirmClick()">确定</button>
+            </span>
+        </td>
+    </tr>
+</table>
+<link href="js/select2.min.css" rel="stylesheet" />
+<script src="js/jquery-3.7.1.min.js"></script>
+<script src="js/select2.min.js"></script>
+<script >
+    let $parentDlg;
+    $( document ).ready(function() {
+     //   $('#cbxFieldList').select2();
+       // $('#cbxDateList').select2();
+    });
+    function btnBiggerClick(){
+        let $txtCondition = $("#txtCondition");
+        let cdStr = $txtCondition.val();
+        cdStr = cdStr + " 大于";
+        $txtCondition.val(cdStr);
+    }
+    function btnSmallerClick() {
+        let $txtCondition = $("#txtCondition");
+        let cdStr = $txtCondition.val();
+        cdStr = cdStr + " 小于";
+        $txtCondition.val(cdStr);
+    }
+    function btnEqualClick() {
+        let $txtCondition = $("#txtCondition");
+        let cdStr = $txtCondition.val();
+        cdStr = cdStr + " =";
+        $txtCondition.val(cdStr);
+    }
+    function btnOrClick() {
+        let $txtCondition = $("#txtCondition");
+        let cdStr = $txtCondition.val();
+        cdStr = cdStr + " OR";
+        $txtCondition.val(cdStr);
+    }
+    function btnAndClick() {
+        let $txtCondition = $("#txtCondition");
+        let cdStr = $txtCondition.val();
+        cdStr = cdStr + " AND";
+        $txtCondition.val(cdStr);
+    }
+    function btnAddFieldClick() {
+        let $txtCondition = $("#txtCondition");
+        let cdStr = $txtCondition.val();
+        let field = $("#cbxFieldList").val();
+        cdStr = cdStr + " " + field;
+        $txtCondition.val(cdStr);
+    }
+
+    function btnAddDateClick() {
+        let $txtCondition = $("#txtCondition");
+        let cdStr = $txtCondition.val();
+        let date = $("#cbxDateList").val();
+        cdStr = cdStr + " " + date;
+        $txtCondition.val(cdStr);
+    }
+
+    function btnConfirmClick() {
+        let str = $("#txtCondition").val();
+        console.log( "btnConfirmClick" + str);
+        $parentDlg.confirmFilterConditionDlg(str)
+    }
+    /**
+     * 填充字段
+     * @param txt 筛选字段
+     * @param fieldList 字段列表
+     */
+    function filterFieldList(txt,fieldList) {
+        let $cbxFieldList = $("#cbxFieldList");
+        let drData = [];
+
+        if (txt !== null && txt !== "") {
+            for (let key in fieldList) {
+                if (fieldList[key].startsWith(txt) > 0) {
+                    drData.push({
+                        id: key,
+                        text: fieldList[key],
+                        selected: false
+                    })
+                }
+            }
+        } else {
+            for (let key in fieldList) {
+                drData.push({
+                    id: key,
+                    text: fieldList[key],
+                    selected: false
+                })
+            }
+        }
+
+
+        $cbxFieldList.select2({
+            width: '100%',
+            data: drData
+        })
+    }
+
+    /**
+     * 筛选出C开头的数据源字段
+     * @param infoArray 原始数据源
+     * @return key value 字典
+     */
+    function extractCLabels(infoArray) {
+        let result = {};
+        infoArray.forEach(item => {
+            if (item.dtl && item.dtl.length > 0) {
+                item.dtl.forEach(dtlItem => {
+                    if(dtlItem.value.startsWith('C')) {
+                        result[dtlItem.value] = dtlItem.label;
+                    }
+                });
+            }
+        });
+        return result;
+    }
+
+    /**
+     * 从袁术数据源中获取日期字段
+     * @param infoArray 原始数据源
+     * @return key value 字典
+     */
+    function getDataSource(infoArray) {
+        let result = {};
+        infoArray.forEach(item => {
+            if (item.value === "textDate") {
+                item.dtl.forEach(dtlItem => {
+                    result[dtlItem.value] = dtlItem.label;
+                });
+            }
+        });
+        return sortObjectByKeys(result);
+    }
+
+    /**
+     * 对key value 字典排序
+     * @param obj 字典
+     * @return  排序后的key value 字典
+     */
+    function sortObjectByKeys(obj) {
+        return Object.keys(obj).sort().reduce((accum, key) => {
+            accum[key] = obj[key];
+            return accum;
+        }, {});
+    }
+
+    /**
+     * 筛选条件对话框开启时候初始化
+     * @param $dlg 对话框
+     * @param condition 条件字符串
+     */
+    function filterConditionDlgInit($dlg, condition,dsInfo){
+        $parentDlg = $dlg;
+        //获取所有c开头的变量
+        let allDs =  extractCLabels(dsInfo);
+        //排序
+        let fieldList = sortObjectByKeys(allDs);
+        //填充字段
+        filterFieldList(null,fieldList);
+
+        let dateDs = getDataSource(dsInfo)
+        let drData = [];
+        for (let key in dateDs) {
+            drData.push({
+                id: key,
+                text: dateDs[key],
+                selected: false
+            })
+        }
+        $("#cbxDateList").select2({
+            width: '100%',
+            data: drData
+        })
+        if (condition !== undefined && condition !==null ){
+            $("#txtCondition").val(condition);
+        }
+
+    }
+</script>
+</body>
+</html>
