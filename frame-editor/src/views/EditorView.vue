@@ -12,13 +12,13 @@
       <!-- 文件操作 -->
       <div class="toolbar-group">
         <el-tooltip content="新建" placement="bottom">
-          <el-button type="default" icon="el-icon-plus" @click="handleNew" />
+          <el-button type="default" icon="el-icon-plus" @click="handleNew" >新建</el-button>
         </el-tooltip>
         <el-tooltip content="导入XML" placement="bottom">
-          <el-button type="default" icon="el-icon-upload" @click="handleImport" />
+          <el-button type="default" icon="el-icon-upload" @click="handleImport">导入</el-button>
         </el-tooltip>
         <el-tooltip content="导出XML" placement="bottom">
-          <el-button type="default" icon="el-icon-download" @click="handleExport" />
+          <el-button type="default" icon="el-icon-download" @click="handleExport">导出</el-button>
         </el-tooltip>
       </div>
       
@@ -56,16 +56,16 @@
       <!-- 编辑操作 -->
       <div class="toolbar-group">
         <el-tooltip content="复制" placement="bottom">
-          <el-button type="default" icon="el-icon-copy-document" @click="handleCopy" :disabled="!editorStore.hasSelection" />
+          <el-button type="default" icon="el-icon-copy-document" @click="handleCopy" :disabled="!editorStore.hasSelection">复制</el-button>
         </el-tooltip>
         <el-tooltip content="剪切" placement="bottom">
-          <el-button type="default" icon="el-icon-scissors" @click="handleCut" :disabled="!editorStore.hasSelection" />
+          <el-button type="default" icon="el-icon-scissors" @click="handleCut" :disabled="!editorStore.hasSelection">剪切</el-button>
         </el-tooltip>
         <el-tooltip content="粘贴" placement="bottom">
-          <el-button type="default" icon="el-icon-document-add" @click="handlePaste" :disabled="!clipboardStore.hasElements" />
+          <el-button type="default" icon="el-icon-document-add" @click="handlePaste" :disabled="!clipboardStore.hasElements">粘贴</el-button>
         </el-tooltip>
         <el-tooltip content="删除" placement="bottom">
-          <el-button type="default" icon="el-icon-delete" @click="handleDelete" :disabled="!editorStore.hasSelection" />
+          <el-button type="default" icon="el-icon-delete" @click="handleDelete" :disabled="!editorStore.hasSelection">删除</el-button>
         </el-tooltip>
       </div>
       
@@ -153,24 +153,19 @@
           <el-button icon="el-icon-close" circle size="mini" @click="editorStore.deselectAll" />
         </div>
         
-        <!-- 根据选中元素类型显示不同的属性编辑面板 -->
+        <!-- 单个元素选择时 -->
         <div v-if="editorStore.selectedElements.length === 1" class="property-form">
           <component :is="`${editorStore.selectedElements[0].type}-properties`" 
-                    :element="editorStore.selectedElements[0]"
-                    @update="updateElementProperty" />
+                     :element="editorStore.selectedElements[0]"
+                     @update="updateElementProperty" />
         </div>
         
         <!-- 多选时显示通用属性 -->
         <div v-else-if="editorStore.selectedElements.length > 1" class="property-form">
-          <div class="form-item">
-            <label>选中了 {{ editorStore.selectedElements.length }} 个元素</label>
-          </div>
-          
-          <!-- 通用属性 -->
-          <div class="form-item">
-            <label>透明度</label>
-            <el-slider v-model="commonOpacity" :min="0" :max="1" :step="0.01" @change="updateCommonProperty('opacity', commonOpacity)" />
-          </div>
+          <PropertyPanel 
+            ref="multiSelectPropertyPanel"
+            @property-change="handleMultiPropertyChange"
+          />
         </div>
       </div>
     </div>
@@ -198,11 +193,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useEditorStore, useElementsStore, useClipboardStore } from '../stores';
 import { useFabricCanvas } from '../hooks/useFabricCanvas';
 import { XmlService } from '../services/xml/xmlService';
+import { PropertyPanel } from '../components/editor/property';
 
 // 存储和路由
 const router = useRouter();
@@ -242,10 +238,61 @@ const commonOpacity = computed(() => {
   }
 });
 
+// 多选属性面板处理
+const multiSelectPropertyPanel = ref(null);
+
+const handleMultiPropertyChange = (id, value) => {
+  // 根据属性ID更新对应的共有属性
+  updateCommonProperty(id, value);
+};
+
+// 初始化多选属性面板
+const initMultiSelectPanel = () => {
+  if (!multiSelectPropertyPanel.value || !editorStore.selectedElements.length) return;
+  
+  // 清空现有属性
+  multiSelectPropertyPanel.value.clearProperties();
+  
+  // 添加选中元素数量的标签
+  multiSelectPropertyPanel.value.addProperty(
+    `选中了 ${editorStore.selectedElements.length} 个元素`,
+    '',
+    null,
+    'label'
+  );
+  
+  // 添加分隔行 - 通用属性
+  multiSelectPropertyPanel.value.addSplitRow('通用属性');
+  
+  // 添加透明度属性
+  multiSelectPropertyPanel.value.addPropertyById(
+    'opacity',
+    '透明度',
+    commonOpacity.value,
+    null,
+    'int'
+  );
+};
+
+// 监听选中元素变化，初始化多选属性面板
+watch(() => editorStore.selectedElementIds, (newIds) => {
+  if (newIds.length > 1) {
+    nextTick(() => {
+      initMultiSelectPanel();
+    });
+  }
+}, { deep: true });
+
 // 初始化
 onMounted(async () => {
   // 初始化画布
   await initCanvas(canvas.value);
+  
+  // 设置画布容器引用
+  canvasContainer.value = canvas.value.parentElement;
+  
+  // 添加窗口大小变化监听
+  window.addEventListener('resize', handleResize);
   
   // 监听右键事件
   window.addEventListener('contextmenu', handleContextMenu);
@@ -258,6 +305,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
   window.removeEventListener('contextmenu', handleContextMenu);
   window.removeEventListener('keydown', handleKeyDown);
 });
@@ -395,6 +443,13 @@ const updateElementProperty = (elementId, property, value) => {
 
 // 更新多个元素的共有属性
 const updateCommonProperty = (property, value) => {
+  // 如果值是字符串类型但期望是数字，则转换
+  if (property === 'opacity' && typeof value === 'string') {
+    value = parseFloat(value);
+  } else if (['x', 'y', 'width', 'height', 'rotation'].includes(property) && typeof value === 'string') {
+    value = parseInt(value);
+  }
+  
   editorStore.selectedElements.forEach(element => {
     const updatedElement = { ...element, [property]: value };
     elementsStore.updateElement(updatedElement);
@@ -456,6 +511,11 @@ const handleSave = () => {
 const handlePreview = () => {
   router.push('/preview');
 };
+
+// 处理窗口大小变化
+const handleResize = () => {
+  // 这里可以调用更新画布大小的方法
+};
 </script>
 
 <style>
@@ -512,6 +572,7 @@ const handlePreview = () => {
   flex: 1;
   overflow: hidden;
   position: relative;
+  min-height: 600px; /* 确保最小高度 */
 }
 
 .editor-canvas {
@@ -519,6 +580,10 @@ const handlePreview = () => {
   overflow: auto;
   background-color: #e0e0e0;
   position: relative;
+  min-height: 600px; /* 确保最小高度 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .editor-property-panel {

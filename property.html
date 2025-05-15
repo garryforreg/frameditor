@@ -131,15 +131,19 @@
         document.body.append($table.get(0));
     }
 
+    // 初始化整个页面脚本
     $(function() {
         if ($tbody === null)
         Init();
     });
 
+    // 全局公开清除属性的方法
     window.ClearProperty = function (){
         if ($tbody !== null)
             $tbody.empty();
     }
+
+    // 全局公开获取选择的行索引的方法
     window.GetSelectRow = function () {
         return rowIndex;
     }
@@ -154,11 +158,13 @@
         $cell.text(newName);
     }
 
+    // 全局公开获取属性值
     window.GetPropertyValue = function (id){
         let $cell = $("#valueTd_" + id);
         return $cell.get(0).childNodes[0];
     }
     
+    // 全局公开获取显示的名称
     window.GetDisplayName = function (id){
         let $cell = $("#nameTd_" + id);
         return $cell.text();
@@ -167,7 +173,7 @@
     window.onload = function () {
       
     }
- 
+     // 添加一个跨2列的行   
      window.AddSplitRow = function (text) {
          if ($tbody === null) {
              Init();

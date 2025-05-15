@@ -10,6 +10,11 @@ const routes = [
     path: '/preview',
     name: 'Preview',
     component: () => import('../views/PreviewView.vue')
+  },
+  {
+    path: '/property-demo',
+    name: 'PropertyDemo',
+    component: () => import('../views/PropertyDemoView.vue')
   }
 ];
 

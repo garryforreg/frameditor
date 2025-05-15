@@ -29,14 +29,36 @@ export function useFabricCanvas() {
   
   // 更新画布大小
   const updateCanvasSize = () => {
-    if (!fabricCanvas.value || !canvasContainer.value) return;
+    if (!fabricCanvas.value) return;
     
-    const container = canvasContainer.value;
-    const width = container.clientWidth;
-    const height = container.clientHeight;
+    let container = canvasContainer.value;
     
+    // 如果没有容器，尝试从canvas元素获取父元素
+    if (!container && canvas.value) {
+      container = canvas.value.parentElement;
+    }
+    
+    if (!container) return;
+    
+    // 获取容器尺寸
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    
+    // 设置最小尺寸，确保画布足够大
+    const width = Math.max(containerWidth, 800);
+    const height = Math.max(containerHeight, 600);
+    
+    // 设置画布尺寸
     fabricCanvas.value.setWidth(width);
     fabricCanvas.value.setHeight(height);
+    
+    // 设置画布容器样式
+    if (container) {
+      container.style.width = '100%';
+      container.style.height = '100%';
+      container.style.overflow = 'auto';
+    }
+    
     fabricCanvas.value.renderAll();
   };
   

@@ -212,6 +212,10 @@ export const useElementsStore = defineStore('elements', () => {
     return addElement(element);
   }
   
+  // 创建表格控件
+  function createTable(){
+    
+  }
   // 更改元素层级 - 置顶
   function bringToFront(id) {
     const element = getElementById(id);
